@@ -1,12 +1,15 @@
 <?php
-session_start();
+// ✅ Chỉ gọi session_start() nếu chưa có session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= isset($title) ? htmlspecialchars($title) : "Trang Chủ" ?></title>
+    <title><?= isset($title) ? $title : "Trang Chủ" ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -25,13 +28,9 @@ session_start();
                 <li class="nav-item"><a class="nav-link" href="giohang.php">Giỏ Hàng</a></li>
             </ul>
             <ul class="navbar-nav">
-                <?php if (isset($_SESSION['MaSV'])): ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white">Xin chào, <?= htmlspecialchars($_SESSION['HoTen']) ?>!</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-danger" href="logout.php">Đăng Xuất</a>
-                    </li>
+                <?php if (isset($_SESSION['HoTen'])): ?>
+                    <li class="nav-item"><span class="nav-link text-white">Xin chào, <?= $_SESSION['HoTen'] ?>!</span></li>
+                    <li class="nav-item"><a class="nav-link text-danger" href="logout.php">Đăng Xuất</a></li>
                 <?php else: ?>
                     <li class="nav-item"><a class="nav-link" href="login.php">Đăng Nhập</a></li>
                 <?php endif; ?>
@@ -41,10 +40,12 @@ session_start();
 </nav>
 
 <!-- Nội dung trang -->
+<!-- Nội dung trang -->
 <div class="container mt-4">
     <?php 
-    if (!empty($content) && file_exists(__DIR__ . '/' . $content)) {
-        include __DIR__ . '/' . $content;
+    $file_path = __DIR__ . '/' . $content;
+    if (!empty($content) && file_exists($file_path)) {
+        include $file_path;
     } else {
         echo "<div class='alert alert-warning text-center'>Lỗi: Không tìm thấy nội dung trang!</div>";
     }

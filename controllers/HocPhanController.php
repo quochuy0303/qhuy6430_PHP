@@ -14,7 +14,7 @@ $hocPhan = new HocPhan();
 // Lấy danh sách tất cả học phần
 $hocPhans = $hocPhan->getAll();
 
-// Xử lý đăng ký môn học
+// ✅ Xử lý đăng ký môn học
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['register'])) {
     if (!empty($_POST['MaHP'])) {
         $MaHP = $_POST['MaHP'];
@@ -22,22 +22,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['register'])) {
         // Kiểm tra xem học phần đã được đăng ký chưa
         if ($hocPhan->isCourseRegistered($MaSV, $MaHP)) {
             header("Location: ../views/hocphan.php?error=already_registered");
+            exit();
+        }
+
+        // Đăng ký học phần
+        if ($hocPhan->registerCourse($MaSV, $MaHP)) {
+            header("Location: ../views/hocphan.php?success=registered");
+            exit();
         } else {
-            if ($hocPhan->registerCourse($MaSV, $MaHP)) {
-                header("Location: ../views/hocphan.php?success=registered");
-            } else {
-                header("Location: ../views/hocphan.php?error=register_failed");
-            }
+            header("Location: ../views/hocphan.php?error=register_failed");
+            exit();
         }
     } else {
         header("Location: ../views/hocphan.php?error=invalid_course");
+        exit();
     }
-    exit();
 }
 
-// Xử lý xóa từng học phần đã đăng ký
-if (isset($_GET['remove'])) {
+// ✅ Xử lý xóa từng học phần đã đăng ký
+if (isset($_GET['remove']) && !empty($_GET['remove'])) {
     $MaHP = $_GET['remove'];
+
+    // Kiểm tra xem học phần có tồn tại không
+    if (!$hocPhan->isCourseRegistered($MaSV, $MaHP)) {
+        header("Location: ../views/giohang.php?error=not_registered");
+        exit();
+    }
 
     if ($hocPhan->removeCourse($MaSV, $MaHP)) {
         header("Location: ../views/giohang.php?success=removed");
@@ -47,7 +57,7 @@ if (isset($_GET['remove'])) {
     exit();
 }
 
-// Xử lý xóa toàn bộ học phần đã đăng ký
+// ✅ Xử lý xóa toàn bộ học phần đã đăng ký
 if (isset($_GET['clear_all'])) {
     if ($hocPhan->clearAllCourses($MaSV)) {
         header("Location: ../views/giohang.php?success=cleared");
